@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SPPG CITEUREUP 1 | Sistem Manajemen</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+:root{--blue:#2864f0;--navy:#1d2b4f;--bg:#f2f6fd;--muted:#8290a8;--line:#e8edf5;--white:#fff}
+*{box-sizing:border-box}body{margin:0;font:14px Inter,system-ui,Arial;color:var(--navy);background:var(--bg)}
+button,input,select,textarea{font:inherit}button{cursor:pointer;border:0;border-radius:9px;padding:10px 14px;background:var(--blue);color:#fff;font-weight:600}
+button.secondary{background:#edf2ff;color:var(--blue)}button.danger{background:#fff0f0;color:#c33}button.ghost{background:#fff;color:#53617b;border:1px solid var(--line)}
+input,select,textarea{width:100%;padding:11px;border:1px solid #dfe6f0;border-radius:8px;background:#fff;color:#23314f;outline:none}label{display:block;font-size:12px;color:#71809a;margin:0 0 6px}.field{margin-bottom:13px}
+.login-wrap{min-height:100vh;display:grid;place-items:center;padding:20px;background:linear-gradient(130deg,#edf3ff,#f8faff)}
+.login{display:grid;grid-template-columns:1fr 1fr;max-width:850px;width:100%;background:#fff;border-radius:25px;overflow:hidden;box-shadow:0 20px 60px #203c7318}
+.login-info{background:#2875f5;color:white;padding:65px 48px;display:flex;flex-direction:column;justify-content:center}.login-info h1{font-size:28px;margin:0 0 15px}.login-form{padding:55px 11%;display:flex;flex-direction:column;justify-content:center}.login-form h2{text-align:center;margin:0 0 28px}
+.app{display:none;min-height:100vh}.sidebar{width:245px;background:#fff;position:fixed;inset:0 auto 0 0;padding:26px 18px;border-right:1px solid var(--line);display:flex;flex-direction:column;z-index:5}
+.brand{font-size:20px;font-weight:800;color:var(--blue);padding:4px 12px 28px}.nav{display:grid;gap:5px}.nav button{background:transparent;color:#75839b;text-align:left;font-weight:500;padding:13px 14px}.nav button.active,.nav button:hover{background:#eef3ff;color:var(--blue)}.side-foot{margin-top:auto;padding:12px;color:#9aa6b8;font-size:12px}
+.main{margin-left:245px;padding:30px;max-width:1700px}.top{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:25px}.top h1{font-size:23px;margin:0}.sub{color:#93a0b4;margin-top:5px;font-size:12px}
+.panel{background:#fff;border:1px solid var(--line);border-radius:15px;padding:20px;margin-bottom:18px;box-shadow:0 5px 20px #243e6906}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px;margin-bottom:18px}.stat{background:#fff;padding:19px;border-radius:14px;border:1px solid var(--line)}.stat small{color:#8b98ad}.stat strong{display:block;font-size:25px;margin-top:9px}
+.toolbar{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-bottom:15px}.toolbar input{max-width:260px}.toolbar select{max-width:190px}
+.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;white-space:nowrap}th,td{text-align:left;padding:13px 12px;border-bottom:1px solid #eef1f6;font-size:12px}th{background:#f8faff;color:#8190a7;font-weight:700}td{color:#42516d}.pill{display:inline-block;padding:5px 9px;border-radius:20px;background:#eaf8ef;color:#25824a;font-size:11px}.pill.off{background:#fff1e9;color:#b86a25}.actions{display:flex;gap:5px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:15px}.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:0 13px}.form-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:10px}.hidden{display:none!important}.empty{padding:35px;text-align:center;color:#9aa6b8}
+.modal{position:fixed;inset:0;background:#15213b77;display:none;place-items:center;padding:18px;z-index:10}.modal.show{display:grid}.modal-box{background:#fff;border-radius:16px;padding:22px;width:min(680px,100%);max-height:92vh;overflow:auto}.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.modal-head h3{margin:0}
+.notice{padding:11px 13px;border-radius:9px;background:#f0f5ff;color:#46608c;font-size:12px;margin-bottom:15px}
+@media(max-width:850px){.sidebar{width:70px;padding:20px 8px}.brand{font-size:0;padding:5px}.brand:after{content:'S';font-size:22px}.nav button{font-size:0;text-align:center;padding:13px 5px}.nav button:before{content:attr(data-icon);font-size:18px}.side-foot{display:none}.main{margin-left:70px;padding:18px}.stats{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.login{grid-template-columns:1fr}.login-info{padding:25px}.login-form{padding:30px}.grid2,.form-grid{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}}
+@media print{body{background:#fff}body>*:not(#slip){display:none!important}#slip{display:block!important}.print-area{display:block!important}}
+</style>
+</head>
+<body>
+<section id="loginPage" class="login-wrap">
+ <div class="login">
+  <div class="login-info"><h1>SPPG CITEUREUP 1</h1><p>Sistem Manajemen Relawan, Payroll & Penerima Manfaat</p><p style="opacity:.85;margin-top:25px">Kelola data operasional dalam satu dashboard yang terintegrasi.</p></div>
+  <div class="login-form"><h2>Masuk Admin</h2>
+   <div class="field"><label>Email</label><input id="email" type="email" placeholder="admin@email.com"></div>
+   <div class="field"><label>Password</label><input id="password" type="password" placeholder="Masukkan password"></div>
+   <button id="loginBtn" onclick="login()">LOGIN</button><p id="loginMsg" class="sub"></p>
+  </div>
+ </div>
+</section>
+<div id="app" class="app">
+<aside class="sidebar"><div class="brand">SPPG CITEUREUP 1</div><nav class="nav">
+<button class="active" data-page="dashboard" data-icon="▦" onclick="showPage('dashboard',this)">Dashboard</button>
+<button data-page="volunteers" data-icon="♙" onclick="showPage('volunteers',this)">Data Relawan</button>
+<button data-page="attendance" data-icon="◷" onclick="showPage('attendance',this)">Absensi</button>
+<button data-page="payroll" data-icon="▤" onclick="showPage('payroll',this)">Payroll & Gaji</button>
+<button data-page="beneficiaries" data-icon="♧" onclick="showPage('beneficiaries',this)">Penerima Manfaat</button>
+<button data-page="reports" data-icon="▥" onclick="showPage('reports',this)">Laporan</button>
+</nav><div class="side-foot">SPPG CITEUREUP 1<br>KOTA CIMAHI<br><button class="ghost" style="margin-top:14px;width:100%" onclick="logout()">Keluar</button></div></aside>
+<main class="main">
+<header class="top"><div><h1 id="pageTitle">Dashboard</h1><div class="sub">SPPG CITEUREUP 1 KOTA CIMAHI</div></div><div class="sub" id="today"></div></header>
+<section id="page-dashboard">
+ <div class="stats">
+  <div class="stat"><small>Total Relawan Aktif</small><strong id="statVol">0</strong></div>
+  <div class="stat"><small>Total Penerima Manfaat</small><strong id="statBen">0</strong></div>
+  <div class="stat"><small>Total Sekolah</small><strong id="statSchool">0</strong></div>
+  <div class="stat"><small>Total Posyandu</small><strong id="statPos">0</strong></div>
+ </div>
+ <div class="panel"><h3>Ringkasan Sistem</h3><p class="sub">Gunakan menu di sebelah kiri untuk mengelola relawan, absensi, payroll, dan penerima manfaat.</p><div class="notice">BPJS Ketenagakerjaan dicatat sebagai tanggungan perusahaan dan tidak dipotong dari gaji bersih relawan.</div></div>
+</section>
+<section id="page-volunteers" class="hidden">
+ <div class="panel"><div class="toolbar"><input id="volSearch" placeholder="Cari nama / divisi..." oninput="renderVol()"><select id="volFilter" onchange="renderVol()"><option value="">Semua status</option><option>Aktif</option><option>Nonaktif</option></select><button onclick="openVolunteer()">+ Tambah Relawan</button><button class="secondary" onclick="exportExcel('volunteers')">Export Excel</button><label class="secondary" style="padding:10px 13px;border-radius:9px;cursor:pointer">Import Excel<input type="file" accept=".xlsx,.xls,.csv" hidden onchange="importExcel(event,'volunteers')"></label></div>
+ <div class="table-wrap"><table><thead><tr><th>Kode</th><th>Nama</th><th>Divisi</th><th>Jabatan</th><th>Gaji Bulanan</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="volRows"></tbody></table></div></div>
+</section>
+<section id="page-attendance" class="hidden">
+ <div class="panel"><div class="toolbar"><input type="date" id="attDate"><select id="attVolunteer"></select><select id="attStatus"><option>Hadir</option><option>Izin</option><option>Sakit</option><option>Alpha</option><option>Libur</option></select><button onclick="saveAttendance()">Simpan Absensi</button><button class="secondary" onclick="exportExcel('attendance')">Export Excel</button><label class="secondary" style="padding:10px 13px;border-radius:9px;cursor:pointer">Import Excel<input type="file" accept=".xlsx,.xls,.csv" hidden onchange="importExcel(event,'attendance')"></label></div><div class="table-wrap"><table><thead><tr><th>Tanggal</th><th>Relawan</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="attRows"></tbody></table></div></div>
+</section>
+<section id="page-payroll" class="hidden">
+ <div class="panel"><div class="toolbar"><input type="date" id="periodStart"><input type="date" id="periodEnd"><input type="number" id="scheduledDays" min="1" placeholder="Hari kerja terjadwal" style="max-width:170px"><button onclick="generatePayroll()">Proses Payroll</button><button class="secondary" onclick="exportExcel('payrolls')">Export Excel</button><label class="secondary" style="padding:10px 13px;border-radius:9px;cursor:pointer">Import Excel<input type="file" accept=".xlsx,.xls,.csv" hidden onchange="importExcel(event,'payrolls')"></label></div><div class="notice">Rumus: (Gaji bulanan ÷ hari kerja terjadwal × hari hadir) + tambahan − cicilan pinjaman − potongan lain. BPJS perusahaan tidak mengurangi gaji.</div><div class="table-wrap"><table><thead><tr><th>Periode</th><th>Relawan</th><th>Hari Hadir</th><th>Gaji Pokok Prorata</th><th>Tambahan</th><th>Cicilan</th><th>BPJS (Perusahaan)</th><th>Gaji Bersih</th><th>Aksi</th></tr></thead><tbody id="payRows"></tbody></table></div></div>
+ <div class="panel"><h3>Pinjaman Relawan</h3><div class="toolbar"><select id="loanVolunteer"></select><input id="loanAmount" type="number" placeholder="Jumlah pinjaman"><input id="loanInstallment" type="number" placeholder="Cicilan per payroll"><input id="loanDesc" placeholder="Keterangan"><button onclick="addLoan()">Tambah Pinjaman</button></div><div class="table-wrap"><table><thead><tr><th>Relawan</th><th>Tanggal</th><th>Pinjaman</th><th>Cicilan</th><th>Sisa</th><th>Status</th></tr></thead><tbody id="loanRows"></tbody></table></div></div>
+</section>
+<section id="page-beneficiaries" class="hidden">
+ <div class="panel"><div class="toolbar"><input id="benSearch" placeholder="Cari sekolah / posyandu..." oninput="renderBen()"><select id="benType" onchange="renderBen()"><option value="">Semua kelompok</option><option>Sekolah</option><option>Posyandu</option></select><button onclick="openBeneficiary()">+ Tambah Penerima</button><button class="secondary" onclick="exportExcel('beneficiary_groups')">Export Excel</button><label class="secondary" style="padding:10px 13px;border-radius:9px;cursor:pointer">Import Excel<input type="file" accept=".xlsx,.xls,.csv" hidden onchange="importExcel(event,'beneficiary_groups')"></label></div><div class="table-wrap"><table><thead><tr><th>Jenis</th><th>Nama</th><th>Kelas Atas</th><th>Kelas Bawah</th><th>Tenaga Pendidik</th><th>Ibu Hamil</th><th>Ibu Menyusui</th><th>Balita</th><th>Total</th><th>Aksi</th></tr></thead><tbody id="benRows"></tbody></table></div><h3 id="benGrand" style="text-align:right;margin:20px 5px 0"></h3></div>
+</section>
+<section id="page-reports" class="hidden"><div class="panel"><h3>Laporan Ringkas</h3><p id="reportText"></p><button onclick="window.print()">Cetak Laporan</button></div></section>
+</main></div>
+<div id="modal" class="modal"><div class="modal-box"><div class="modal-head"><h3 id="modalTitle"></h3><button class="ghost" onclick="closeModal()">Tutup</button></div><div id="modalBody"></div></div></div>
+<div id="slip" class="print-area hidden"></div>
+<script>
+const SUPABASE_URL='https://szqizurrpsjrwvhemfgn.supabase.co';
+const SUPABASE_ANON_KEY='sb_publishable_yRMRbhVA9zgAMM-df9od6Q_YDAQcxh-';
+const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+let volunteers=[],attendance=[],payrolls=[],beneficiaries=[],loans=[];
+const $=id=>document.getElementById(id), money=n=>'Rp '+Number(n||0).toLocaleString('id-ID');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const today=new Date().toISOString().slice(0,10);$('today').textContent=new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+$('attDate').value=today;$('periodStart').value=today.slice(0,7)+'-01';$('periodEnd').value=today;
+async function login(){const email=$('email').value.trim(),password=$('password').value;$('loginMsg').textContent='Memeriksa akun...';const {error}=await db.auth.signInWithPassword({email,password});if(error){$('loginMsg').textContent=error.message;return}await boot()}
+async function logout(){await db.auth.signOut();$('app').style.display='none';$('loginPage').style.display='grid'}
+async function boot(){const {data:{user}}=await db.auth.getUser();if(!user)return;const {data:admin,error}=await db.from('admin_users').select('user_id').eq('user_id',user.id).maybeSingle();if(error||!admin){await db.auth.signOut();$('loginMsg').textContent='Akun ini belum diberi akses admin. Tambahkan akun ke tabel admin_users.';return}
+$('loginPage').style.display='none';$('app').style.display='block';await refreshAll()}
+db.auth.getSession().then(({data})=>{if(data.session)boot()});
+async function load(table){const {data,error}=await db.from(table).select('*').order('created_at',{ascending:false});if(error)throw error;return data||[]}
+async function refreshAll(){try{[volunteers,attendance,payrolls,beneficiaries,loans]=await Promise.all(['volunteers','attendance','payrolls','beneficiary_groups','loans'].map(load));renderAll()}catch(e){alert('Gagal memuat data: '+e.message)}}
+function renderAll(){renderVol();renderAtt();renderPay();renderBen();renderLoans();fillVolunteerSelects();$('statVol').textContent=volunteers.filter(v=>v.status==='Aktif').length;$('statBen').textContent=beneficiaries.reduce((s,b)=>s+totalBen(b),0);$('statSchool').textContent=beneficiaries.filter(b=>b.institution_type==='Sekolah').length;$('statPos').textContent=beneficiaries.filter(b=>b.institution_type==='Posyandu').length;$('reportText').textContent=`Relawan aktif: ${$('statVol').textContent}. Total penerima manfaat: ${$('statBen').textContent}. Sekolah: ${$('statSchool').textContent}. Posyandu: ${$('statPos').textContent}.`}
+function showPage(p,btn){document.querySelectorAll('[id^=page-]').forEach(x=>x.classList.add('hidden'));$('page-'+p).classList.remove('hidden');document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));btn?.classList.add('active');$('pageTitle').textContent=({dashboard:'Dashboard',volunteers:'Data Relawan',attendance:'Absensi Relawan',payroll:'Payroll & Gaji',beneficiaries:'Penerima Manfaat',reports:'Laporan'})[p]}
+function openModal(title,html){$('modalTitle').textContent=title;$('modalBody').innerHTML=html;$('modal').classList.add('show')}function closeModal(){$('modal').classList.remove('show')}
+const divisions=['Prepare','Pengolahan Bahan','Pemorsian Distribusi','Cuci Food Tray','Admin Gudang','Admin','Chef','Asisten Lapangan','Office boy'];
+function renderVol(){let q=($('volSearch').value||'').toLowerCase(),f=$('volFilter').value;let rows=volunteers.filter(v=>(!f||v.status===f)&&[v.full_name,v.division,v.volunteer_code].join(' ').toLowerCase().includes(q));$('volRows').innerHTML=rows.map(v=>`<tr><td>${esc(v.volunteer_code||'-')}</td><td><b>${esc(v.full_name)}</b></td><td>${esc(v.division)}</td><td>${v.is_coordinator?'Koordinator':'Anggota'}</td><td>${money(v.monthly_salary)}</td><td><span class="pill ${v.status==='Aktif'?'':'off'}">${v.status}</span></td><td><div class="actions"><button class="secondary" onclick="editVolunteer('${v.id}')">Edit</button><button class="ghost" onclick="toggleVolunteer('${v.id}')">${v.status==='Aktif'?'Nonaktifkan':'Aktifkan'}</button><button class="danger" onclick="deleteVolunteer('${v.id}')">Hapus</button></div></td></tr>`).join('')||'<tr><td colspan="7" class="empty">Belum ada data relawan</td></tr>'}
+function openVolunteer(v={}){openModal(v.id?'Edit Relawan':'Tambah Relawan',`<form id="volForm" class="form-grid">
+<input type="hidden" name="id" value="${v.id||''}">
+<div class="field"><label>Kode Relawan</label><input name="volunteer_code" value="${esc(v.volunteer_code||'')}"></div>
+<div class="field"><label>Nama Lengkap *</label><input name="full_name" required value="${esc(v.full_name||'')}"></div>
+<div class="field"><label>No. HP</label><input name="phone" value="${esc(v.phone||'')}"></div>
+<div class="field"><label>Divisi *</label><select name="division" required>${divisions.map(d=>`<option ${v.division===d?'selected':''}>${d}</option>`).join('')}</select></div>
+<div class="field"><label>Jabatan</label><select name="is_coordinator"><option value="false" ${!v.is_coordinator?'selected':''}>Tidak / Anggota</option><option value="true" ${v.is_coordinator?'selected':''}>Koordinator</option></select></div>
+<div class="field"><label>Gaji Bulanan (Rp)</label><input name="monthly_salary" type="number" min="0" value="${v.monthly_salary||0}"></div>
+<div class="field"><label>Status</label><select name="status"><option ${v.status!=='Nonaktif'?'selected':''}>Aktif</option><option ${v.status==='Nonaktif'?'selected':''}>Nonaktif</option></select></div>
+<div class="field"><label>Tanggal Mulai</label><input name="start_date" type="date" value="${v.start_date||''}"></div>
+<div class="field" style="grid-column:1/-1"><label>Catatan</label><textarea name="notes">${esc(v.notes||'')}</textarea></div>
+<div class="form-actions" style="grid-column:1/-1"><button type="button" class="ghost" onclick="closeModal()">Batal</button><button>Simpan Relawan</button></div></form>`);
+$('volForm').onsubmit=async e=>{e.preventDefault();let d=Object.fromEntries(new FormData(e.target));d.is_coordinator=d.is_coordinator==='true';d.monthly_salary=Number(d.monthly_salary||0);if(!d.start_date)d.start_date=null;if(await saveRow('volunteers',d)){closeModal();await refreshAll()}}}
+function editVolunteer(id){openVolunteer(volunteers.find(v=>v.id===id))}
+async function toggleVolunteer(id){let v=volunteers.find(x=>x.id===id);if(await saveRow('volunteers',{id,status:v.status==='Aktif'?'Nonaktif':'Aktif'}))await refreshAll()}
+async function deleteVolunteer(id){if(!confirm('Hapus data relawan ini? Jika sudah memiliki riwayat payroll, penghapusan dapat ditolak database.'))return;let {error}=await db.from('volunteers').delete().eq('id',id);if(error)alert(error.message);else await refreshAll()}
+async function saveRow(table,data){
+  // Form tambah mengirim id="" dari hidden input. Jangan pernah kirim UUID kosong ke Supabase.
+  const payload={...data};
+  const rowId=(payload.id||'').trim();
+  delete payload.id;
+  let query=rowId
+    ? db.from(table).update(payload).eq('id',rowId)
+    : db.from(table).insert(payload);
+  const {error}=await query;
+  if(error){alert('Gagal menyimpan: '+error.message);return false;}
+  return true;
+}
+function fillVolunteerSelects(){let opts=volunteers.map(v=>`<option value="${v.id}">${esc(v.full_name)}</option>`).join('');$('attVolunteer').innerHTML=opts;$('loanVolunteer').innerHTML=opts}
+function renderAtt(){let rows=[...attendance].sort((a,b)=>b.work_date.localeCompare(a.work_date));$('attRows').innerHTML=rows.slice(0,150).map(a=>`<tr><td>${a.work_date}</td><td>${esc(volunteers.find(v=>v.id===a.volunteer_id)?.full_name||'Relawan dihapus')}</td><td>${a.attendance_status}</td><td><button class="danger" onclick="deleteAttendance('${a.id}')">Hapus</button></td></tr>`).join('')||'<tr><td colspan="4" class="empty">Belum ada absensi</td></tr>'}
+async function saveAttendance(){if(!$('attVolunteer').value)return alert('Tambahkan relawan terlebih dahulu');let d={volunteer_id:$('attVolunteer').value,work_date:$('attDate').value,attendance_status:$('attStatus').value};let {error}=await db.from('attendance').upsert(d,{onConflict:'volunteer_id,work_date'});if(error)alert(error.message);else await refreshAll()}
+async function deleteAttendance(id){if(!confirm('Hapus absensi?'))return;let {error}=await db.from('attendance').delete().eq('id',id);if(error)alert(error.message);else await refreshAll()}
+function renderPay(){$('payRows').innerHTML=[...payrolls].sort((a,b)=>b.period_start.localeCompare(a.period_start)).map(p=>`<tr><td>${p.period_start} – ${p.period_end}</td><td>${esc(volunteers.find(v=>v.id===p.volunteer_id)?.full_name||'-')}</td><td>${p.work_days}</td><td>${money(p.salary_base)}</td><td>${money(p.additional_pay)}</td><td>${money(p.loan_deduction)}</td><td>${money(p.bpjs_company_paid)}</td><td><b>${money(p.net_pay)}</b></td><td><div class="actions"><button class="secondary" onclick="printSlip('${p.id}')">Slip</button><button class="danger" onclick="deletePayroll('${p.id}')">Hapus</button></div></td></tr>`).join('')||'<tr><td colspan="9" class="empty">Belum ada payroll</td></tr>'}
+async function generatePayroll(){let start=$('periodStart').value,end=$('periodEnd').value,days=Number($('scheduledDays').value);if(!start||!end||end<start||!days)return alert('Isi tanggal periode dan hari kerja terjadwal dengan benar.');let active=volunteers.filter(v=>v.status==='Aktif');if(!active.length)return alert('Belum ada relawan aktif.');if(payrolls.some(p=>p.period_start===start&&p.period_end===end))return alert('Payroll untuk periode ini sudah pernah dibuat. Hapus payroll periode tersebut terlebih dahulu jika memang perlu diproses ulang.');
+if(!confirm(`Proses payroll ${active.length} relawan untuk ${start} sampai ${end}?`))return;
+for(const v of active){let hadir=attendance.filter(a=>a.volunteer_id===v.id&&a.work_date>=start&&a.work_date<=end&&a.attendance_status==='Hadir').length;let base=Math.round(Number(v.monthly_salary||0)/days*hadir);let {data:loanList,error:le}=await db.from('loans').select('*').eq('volunteer_id',v.id).eq('status','Berjalan').gt('remaining_amount',0);if(le)throw le;let loanDed=0;for(const l of loanList||[]){let pay=Math.min(Number(l.installment_amount||0),Number(l.remaining_amount||0));loanDed+=pay}
+let add=Number(prompt(`Tambahan gaji untuk ${v.full_name} (Rp). Isi 0 jika tidak ada:`,0)||0);let other=Number(prompt(`Potongan lain untuk ${v.full_name} (Rp). Isi 0 jika tidak ada:`,0)||0);let bpjs=Number(prompt(`BPJS ditanggung perusahaan untuk ${v.full_name} (Rp, tidak memotong gaji):`,0)||0);
+let row={volunteer_id:v.id,period_start:start,period_end:end,work_days:hadir,salary_base:base,additional_pay:add,loan_deduction:loanDed,other_deduction:other,bpjs_company_paid:bpjs,gross_pay:base+add,net_pay:base+add-loanDed-other};
+let {data:pay,error}=await db.from('payrolls').upsert(row,{onConflict:'volunteer_id,period_start,period_end'}).select().single();if(error){alert(error.message);continue}
+for(const l of loanList||[]){let amount=Math.min(Number(l.installment_amount||0),Number(l.remaining_amount||0));if(amount<=0)continue;let {error:pe}=await db.from('payroll_loan_payments').insert({payroll_id:pay.id,loan_id:l.id,amount});if(pe)alert(pe.message);else await db.from('loans').update({remaining_amount:l.remaining_amount-amount,status:l.remaining_amount-amount<=0?'Lunas':'Berjalan'}).eq('id',l.id)}
+}await refreshAll();alert('Payroll selesai diproses. Periksa setiap slip sebelum dicetak.')}
+async function deletePayroll(id){if(!confirm('Hapus payroll ini?'))return;let {error}=await db.from('payrolls').delete().eq('id',id);if(error)alert(error.message);else await refreshAll()}
+function renderLoans(){$('loanRows').innerHTML=loans.map(l=>`<tr><td>${esc(volunteers.find(v=>v.id===l.volunteer_id)?.full_name||'-')}</td><td>${l.loan_date}</td><td>${money(l.principal)}</td><td>${money(l.installment_amount)}</td><td>${money(l.remaining_amount)}</td><td>${l.status}</td></tr>`).join('')||'<tr><td colspan="6" class="empty">Belum ada pinjaman</td></tr>'}
+async function addLoan(){let id=$('loanVolunteer').value,principal=Number($('loanAmount').value),inst=Number($('loanInstallment').value);if(!id||principal<=0||inst<=0)return alert('Pilih relawan dan isi jumlah pinjaman serta cicilan.');let {error}=await db.from('loans').insert({volunteer_id:id,principal,installment_amount:inst,remaining_amount:principal,description:$('loanDesc').value});if(error)alert(error.message);else{$('loanAmount').value='';$('loanInstallment').value='';$('loanDesc').value='';await refreshAll()}}
+const benFields=['upper_class','lower_class','educators','pregnant_mothers','breastfeeding_mothers','toddlers'];function totalBen(b){return benFields.reduce((s,k)=>s+Number(b[k]||0),0)}
+function renderBen(){let q=($('benSearch').value||'').toLowerCase(),f=$('benType').value;let rows=beneficiaries.filter(b=>(!f||b.institution_type===f)&&b.institution_name.toLowerCase().includes(q));$('benRows').innerHTML=rows.map(b=>`<tr><td>${b.institution_type}</td><td><b>${esc(b.institution_name)}</b></td><td>${b.upper_class}</td><td>${b.lower_class}</td><td>${b.educators}</td><td>${b.pregnant_mothers}</td><td>${b.breastfeeding_mothers}</td><td>${b.toddlers}</td><td><b>${totalBen(b)}</b></td><td><div class="actions"><button class="secondary" onclick="editBen('${b.id}')">Edit</button><button class="danger" onclick="deleteBen('${b.id}')">Hapus</button></div></td></tr>`).join('')||'<tr><td colspan="10" class="empty">Belum ada data penerima manfaat</td></tr>';$('benGrand').textContent='TOTAL KESELURUHAN: '+beneficiaries.reduce((s,b)=>s+totalBen(b),0)+' PENERIMA MANFAAT'}
+function openBeneficiary(b={}){let fields=[['upper_class','Kelas Atas'],['lower_class','Kelas Bawah'],['educators','Tenaga Pendidik'],['pregnant_mothers','Ibu Hamil'],['breastfeeding_mothers','Ibu Menyusui'],['toddlers','Balita']];openModal(b.id?'Edit Penerima Manfaat':'Tambah Penerima Manfaat',`<form id="benForm"><input type="hidden" name="id" value="${b.id||''}"><div class="form-grid"><div class="field"><label>Jenis Kelompok</label><select name="institution_type" id="bType"><option ${b.institution_type==='Sekolah'?'selected':''}>Sekolah</option><option ${b.institution_type==='Posyandu'?'selected':''}>Posyandu</option></select></div><div class="field"><label>Nama Sekolah / Posyandu *</label><input name="institution_name" required value="${esc(b.institution_name||'')}"></div>${fields.map(([k,l])=>`<div class="field"><label>${l}</label><input type="number" min="0" name="${k}" value="${b[k]||0}"></div>`).join('')}<div class="field" style="grid-column:1/-1"><label>Catatan</label><textarea name="notes">${esc(b.notes||'')}</textarea></div></div><div class="form-actions"><button type="button" class="ghost" onclick="closeModal()">Batal</button><button>Simpan</button></div></form>`);$('benForm').onsubmit=async e=>{e.preventDefault();let d=Object.fromEntries(new FormData(e.target));for(let k of fields.map(x=>x[0]))d[k]=Number(d[k]||0);if(await saveRow('beneficiary_groups',d)){closeModal();await refreshAll()}}}
+function editBen(id){openBeneficiary(beneficiaries.find(b=>b.id===id))}async function deleteBen(id){if(!confirm('Hapus kelompok penerima ini?'))return;let {error}=await db.from('beneficiary_groups').delete().eq('id',id);if(error)alert(error.message);else await refreshAll()}
+function printSlip(id){let p=payrolls.find(x=>x.id===id),v=volunteers.find(x=>x.id===p.volunteer_id);$('slip').innerHTML=`<div style="max-width:780px;margin:25px auto;font-family:Arial;color:#17233e"><div style="text-align:center;border-bottom:2px solid #243b68;padding-bottom:15px"><h2>SPPG CITEUREUP 1 KOTA CIMAHI</h2><h3>SLIP GAJI RELAWAN</h3></div><p>Periode: ${p.period_start} s.d. ${p.period_end}</p><p>Nama: <b>${esc(v?.full_name||'-')}</b><br>Divisi: ${esc(v?.division||'-')}<br>Jabatan: ${v?.is_coordinator?'Koordinator':'Anggota'}</p><table style="width:100%;border-collapse:collapse"><tr><td style="padding:10px;border-bottom:1px solid #ddd">Hari kerja hadir</td><td style="text-align:right">${p.work_days} hari</td></tr><tr><td style="padding:10px;border-bottom:1px solid #ddd">Gaji pokok prorata</td><td style="text-align:right">${money(p.salary_base)}</td></tr><tr><td style="padding:10px;border-bottom:1px solid #ddd">Tambahan</td><td style="text-align:right">${money(p.additional_pay)}</td></tr><tr><td style="padding:10px;border-bottom:1px solid #ddd">Potongan cicilan pinjaman</td><td style="text-align:right">-${money(p.loan_deduction)}</td></tr><tr><td style="padding:10px;border-bottom:1px solid #ddd">Potongan lain</td><td style="text-align:right">-${money(p.other_deduction)}</td></tr><tr><td style="padding:10px;border-bottom:1px solid #ddd">BPJS ditanggung perusahaan (tidak dipotong)</td><td style="text-align:right">${money(p.bpjs_company_paid)}</td></tr><tr><td style="padding:14px;font-weight:bold;border-top:2px solid #243b68">GAJI BERSIH DITERIMA</td><td style="text-align:right;font-weight:bold;border-top:2px solid #243b68">${money(p.net_pay)}</td></tr></table><div style="display:flex;justify-content:flex-end;margin-top:65px"><div style="width:240px;text-align:center">Penerima,<br><br><br><br><b>${esc(v?.full_name||'')}</b><br>Relawan</div></div></div>`;$('slip').classList.remove('hidden');window.print();setTimeout(()=>$('slip').classList.add('hidden'),500)}
+function exportExcel(table){let rows=({volunteers,attendance,payrolls,beneficiary_groups:beneficiaries})[table];if(!rows?.length)return alert('Tidak ada data untuk diekspor.');let data=rows.map(r=>{let x={...r};if(table==='volunteers')x.is_coordinator=x.is_coordinator?'Koordinator':'Anggota';return x});let ws=XLSX.utils.json_to_sheet(data),wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,table);XLSX.writeFile(wb,`SPPG_CITEUREUP_1_${table}.xlsx`)}
+async function importExcel(ev,table){
+ let file=ev.target.files[0];if(!file)return;
+ try{
+  const buffer=await file.arrayBuffer();
+  const workbook=XLSX.read(buffer,{type:'array'});
+  const firstSheet=workbook.Sheets[workbook.SheetNames[0]];
+  const data=XLSX.utils.sheet_to_json(firstSheet,{defval:''});
+  if(!data.length){alert('File Excel kosong.');return;}
+  const allowed={
+   volunteers:['volunteer_code','full_name','phone','division','is_coordinator','position_note','monthly_salary','status','start_date','notes'],
+   attendance:['volunteer_id','work_date','attendance_status','notes'],
+   payrolls:['volunteer_id','period_start','period_end','work_days','salary_base','additional_pay','loan_deduction','other_deduction','bpjs_company_paid','gross_pay','net_pay','notes'],
+   beneficiary_groups:['institution_type','institution_name','upper_class','lower_class','educators','pregnant_mothers','breastfeeding_mothers','toddlers','notes']
+  }[table];
+  if(!allowed)throw new Error('Jenis import tidak didukung.');
+  const mapped=data.map((r,index)=>{
+   const x={};
+   for(const key of allowed)if(Object.prototype.hasOwnProperty.call(r,key))x[key]=r[key];
+   if(table==='volunteers'){
+    if(!x.full_name||!x.division)throw new Error(`Baris ${index+2}: full_name dan division wajib diisi.`);
+    x.is_coordinator=['true','TRUE','1','Koordinator','Ya','ya'].includes(String(x.is_coordinator));
+    x.monthly_salary=Number(x.monthly_salary||0);x.status=x.status||'Aktif';
+    if(x.start_date==='')delete x.start_date;
+   }
+   if(table==='attendance'&&!x.volunteer_id)throw new Error(`Baris ${index+2}: volunteer_id wajib diisi (UUID relawan).`);
+   if(table==='beneficiary_groups'){
+    if(!x.institution_name||!x.institution_type)throw new Error(`Baris ${index+2}: institution_name dan institution_type wajib diisi.`);
+    for(const k of benFields)x[k]=Number(x[k]||0);
+   }
+   return x;
+  });
+  const {error}=await db.from(table).insert(mapped);
+  if(error)throw error;
+  alert(`${mapped.length} baris berhasil diimpor.`);
+  await refreshAll();
+ }catch(e){alert('Import gagal: '+e.message+'\nPeriksa nama kolom dan format data Excel.')}
+ finally{ev.target.value=''}
+}
+</script></body></html>
